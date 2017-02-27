@@ -1,0 +1,402 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="zh">
+<head>
+<title>动产融资统一登记系统接口程序 | 登记信息</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="/css/cloud-admin.css" >
+<link rel="stylesheet" type="text/css"  href="/css/themes/default.css" id="skin-switcher" >
+<link rel="stylesheet" type="text/css"  href="/css/responsive.css" >
+
+<link href="/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+<!-- DATE RANGE PICKER -->
+<link rel="stylesheet" type="text/css" href="/js/bootstrap-daterangepicker/daterangepicker-bs3.css" />
+<!-- TABLE CLOTH -->
+<link rel="stylesheet" type="text/css" href="/js/tablecloth/css/tablecloth.min.css" />
+</head>
+<body>
+
+<div class="box-body" >
+	<div>
+		<!-- BOX -->
+		<shiro:hasAnyRoles name="03,04">
+			<%@include file="queryCreditInfo.jsp" %>
+		</shiro:hasAnyRoles>
+		<div class="box border blue">
+			<div class="box-title">
+				<h4><i class="fa fa-info"></i>登记信息</h4>
+				<div class="tools hidden-xs">
+					<shiro:hasAnyRoles name="03,04">
+					<a href="#queryItemModal" data-toggle="modal" class="config">
+						[&nbsp;<i class="fa fa-search">&nbsp;征信信息查询</i>]
+					</a>
+					<a href="#downloadTemplateModal" onclick="getBusinessType('downloadBusinNoSelector')" data-toggle="modal" class="config">
+						[&nbsp;<i class="fa fa-upload">&nbsp;模板下载</i>]
+					</a>
+					<a href="#uploadRegInfoModal" onclick="getBusinessType('uploadBusinNoSelector')" data-toggle="modal" class="config">
+						[&nbsp;<i class="fa fa-upload">&nbsp;批量导入</i>]
+					</a>
+					</shiro:hasAnyRoles>
+				</div>
+			</div>
+			<div class="box-body">
+				<div class="btn-toolbar" style="margin-bottom:5px;">
+					<%@include file="baseInfoSearchForm.jsp" %>
+				    <%--  <a href="<%=request.getContextPath()%>/users/editUser"><button class="btn btn-primary"><i class="fa fa-plus-circle"></i>&nbsp;&nbsp;批量导入</button></a>
+				    <button onclick='getBusinessType();' class="btn btn-primary"><i class="fa fa-plus-circle"></i>&nbsp;&nbsp;模板下载</button> --%>
+				  <div class="btn-group">
+				  </div>
+				</div>
+				<table class="table table-hover" id="table" style="text-align:center;">
+					<thead>
+					  <tr>
+					  	<%-- <th><%=request.getHeader("Referer")%></th> --%>
+						<th style="text-align:center;">序号</th>
+						<th style="text-align:center;">分行号</th>
+						<th style="text-align:center;">网点号</th>
+						<th style="text-align:center;">业务状态</th>
+						<th style="text-align:center;">业务编号</th>
+						<th style="text-align:center;">业务类型</th>
+						<th style="text-align:center;">处理状态</th>
+						<th style="text-align:center;">业务历程</th>
+						<th style="text-align:center;">操作</th>
+					  </tr>
+					</thead>
+					<tbody id="tbody_regInfo">
+			      		<tr v-for="(index, baseInfo) in baseInfoList">
+				          <td style="vertical-align:middle;">{{ (index + 1) }}</td>
+				          <td style="vertical-align:middle;">{{ baseInfo.departmentno }}</td>
+				          <td style="vertical-align:middle;">{{ baseInfo.brandno }}</td>
+				          <td style="vertical-align:middle;"><a href="<%=request.getContextPath()%>/regInfo/getRegInfoDetail?reglogid={{ baseInfo.reglogid }}">{{ baseInfo.registertypeName }}</a></td>
+				          <td style="vertical-align:middle;">{{ baseInfo.businessno }}</td>
+				          <td style="vertical-align:middle;">{{ baseInfo.businesstypeName }}</td>
+				          <td style="vertical-align:middle;">{{ baseInfo.registerinfostatusName }}</td>
+				          <td style="vertical-align:middle;">
+								<template v-for=" baseInfoHis in baseInfo.busiHistory ">
+								<a href="<%=request.getContextPath()%>/regInfo/getRegInfoDetail?reglogid={{ baseInfoHis.reglogid }}">[{{ baseInfoHis.registertypeName }}]</a><br/>
+								</template>
+						  </td>
+				          <td  style="vertical-align: middle;">
+				          		<template v-if=" (strContain(loginUser.userRole,'03') || strContain(loginUser.userRole,'04')) ">
+				          			<%-- 不展示条件：展期且未报送、注销、 --%>
+				          			<template v-if=" !((baseInfo.registertype == '03' && baseInfo.registerinfostatus != 'C') || (baseInfo.registertype == '04')) ">
+				          				<a href="#" onclick="modifyConfirm('{{ baseInfo.registerinfostatus }}', '{{ baseInfo.reglogid }}'); "><i class="fa fa-pencil-square-o" aria-hidden="true"></i>&nbsp;修改</a><br/>
+				          			</template>
+				          			<template v-if=" baseInfo.registertype == '03' && baseInfo.registerinfostatus != 'C'">
+				          				<a href="<%=request.getContextPath()%>/regInfo/editBaseInfo?reglogid={{ baseInfo.reglogid }}" "><i class="fa fa-pencil-square-o" aria-hidden="true"></i>&nbsp;修改</a><br/>
+				          			</template>
+				          			
+				          			<%-- 展示条件：初登未报送 --%>
+				          			<template v-if=" baseInfo.registertype == '01' && baseInfo.registerinfostatus != 'C' ">
+				          				<a href="#deleteRegInfoModal" onclick="$('#deleteReglogid').val('{{ baseInfo.reglogid }}');" role="button" data-toggle="modal" ><i class="fa fa-times" aria-hidden="true"></i>&nbsp;删除</a>
+				          			</template>
+				          		</template>
+				          </td>
+				        </tr>
+					</tbody>
+				  </table>
+				  <ul class="pager" id="pager_id">
+					<!-- <li class="previous" id="prePage" onclick="getBaseInfoByPage({{ currentPage - 1 }});"><a  href="javascript:void(0);" >&larr; 上一页</a></li>
+					<li class="next" id="nextPage" onclick="getBaseInfoByPage({{ currentPage + 1 }});"><a  href="javascript:void(0);" >下一页 &rarr;</a></li> -->
+					
+					<input type="hidden" id="currentPage" value="{{ currentPage }}"/>
+					<li class="previous" id="prePage" ><a href="javascript:void(0);" >&larr; 上一页</a></li>
+					<li class="next" id="nextPage" ><a  href="javascript:void(0);" >下一页 &rarr;</a></li>
+					<div style="margin-top:10px;color:#AEB2B5;">共有{{ totalCount }}条记录 页码：{{ currentPage + 1 }}/{{ totalPage }}</div>
+				  </ul>
+			</div>
+		</div>
+		<!-- /BOX -->
+			</div>
+		</div>
+		<!-- /BORDERED HOVER -->
+	<div class="modal fade" id="uploadRegInfoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display:none;">
+		<div class="modal-dialog">
+		  <div class="modal-content">
+			<div class="modal-header">
+			  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			  <h4 class="modal-title">请选择模板文件</h4>
+			</div>
+			<form id="batchImportForm" method="POST" enctype="multipart/form-data">
+				<div class="modal-body" style="font-size:15px;">
+					<input name="batchImportfile" type="file" >
+				</div>
+				
+			</form>
+			<div class="modal-footer">
+			  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+			  <button type="button" onclick="submitUpload();" class="btn btn-primary">确认</button>
+			</div>
+		  </div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="downloadTemplateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display:none;">
+		<div class="modal-dialog">
+		  <div class="modal-content">
+			<div class="modal-header">
+			  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			  <h4 class="modal-title">请选择模板业务类型</h4>
+			</div>
+			<div class="modal-body" style="padding-bottom:40px;">
+			  	<select id='downloadBusinNoSelector' class="col-md-12 form-control" >
+				</select>
+			</div>
+			<div class="modal-footer">
+			  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+			  <button type="button" onclick='downloadTemplate()' class="btn btn-primary">确认</button>
+			</div>
+		  </div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="deleteRegInfoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+		  <div class="modal-content">
+			<div class="modal-header">
+			  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			  <h4 class="modal-title">提示</h4>
+			</div>
+			<input id="deleteReglogid" type="hidden" value=""/>
+			<div class="modal-body" style="font-size:15px;">
+			  确定不报送该记录？
+			</div>
+			<div class="modal-footer">
+			  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+			  <a href="#" onclick="window.location.href='<%=request.getContextPath()%>/regInfo/unableRegInfo?reglogid=' + $('#deleteReglogid').val()" ><button type="button"  class="btn btn-primary">确认</button></a>
+			</div>
+		  </div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="modifyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+		  <div class="modal-content">
+			<div class="modal-header">
+			  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			  <h4 class="modal-title">提示</h4>
+			</div>
+			<input id="modifyModalReglogid" type="hidden" value="" />
+			<div class="modal-body" style="font-size:15px;">
+				登记信息为已报送状态，除了注销操作，其他修改，则将产生费用。变更登记费用为40元/笔。展期登记为100元/笔/年。确定修改？
+			</div>
+			<div class="modal-footer">
+			  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+			  <a href="#"><button type="button" class="btn btn-primary" onclick="fowardTomodifyPage();">确认</button></a>
+			</div>
+		  </div>
+		</div>
+	</div>
+	
+	<div class="" style="overflow:auto; position:fixed;top:50%; left:50%; z-index:1040" id="loadingmodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<img src="${pageContext.request.contextPath}/static/img/loaders/17.gif">
+	</div>
+	
+</div>
+<script src="/js/jquery/jquery-form.js"></script>
+<script type="text/javascript">
+	var vue_tbody_regInfo = new Vue({
+		el: '#tbody_regInfo',
+		data: {
+			baseInfoList: [],
+			loginUser:null
+		},
+		methods: {
+			strContain: function(mainStr, subStr) {
+				return mainStr.indexOf(subStr) > -1;
+			}
+		}
+	});
+	
+	var vue_pager_id = new Vue({
+		el: '#pager_id',
+		data: {
+			beginindex: 1,
+			endindex:15,
+			totalCount:0,
+			currentPage:1,
+			totalPage:1
+		}
+	});
+		
+	$(document).ready(function() {
+		getBaseInfoByPage(0);
+	});
+</script>
+
+<script type="text/javascript">
+
+	function getBaseInfoByPage(page) {
+		$('#loadingmodal').modal();
+		
+		var brandno = $('#lastbrandno').val(); 
+		var clientno = $('#lastclientno').val(); 
+		var businessno = $('#lastbusinessno').val(); 
+		var businesstype = $('#lastbusinesstype').val(); 
+		var registerinfostatus = $('#lastregisterinfostatus').val();
+		
+		$('#pager_id').css('display', '');
+		$("#nextPage").attr("class", "next");
+		$("#prePage").attr("class", "previous");
+		$("#nextPage").removeAttr("onclick");
+		$("#prePage").removeAttr("onclick");
+		$.ajax({
+		    url: '${pageContext.request.contextPath}/regInfo/getAll',
+		    data: {page:page, brandno:brandno, clientno:clientno, businessno:businessno, businesstype:businesstype, registerinfostatus:registerinfostatus},
+		    type: 'GET',
+		    success: function(data) {
+		    	vue_tbody_regInfo.baseInfoList = data["baseInfoList"];
+		    	vue_tbody_regInfo.loginUser = data["loginUser"];
+		    	vue_pager_id.totalCount = data["totalCount"];
+		    	vue_pager_id.currentPage = data["currentPage"];
+		    	vue_pager_id.totalPage = data["totalPage"];
+		    	if (data["currentPage"] + 1 >= data["totalPage"]) {
+		    		$("#nextPage").attr("class", "next disabled");
+		    	} else {
+		    		$("#nextPage").attr("onclick", "getBaseInfoByPage(" + (data["currentPage"] + 1) + ")");
+		    	}
+				if (data["currentPage"] <= 0) {
+					$("#prePage").attr("class", "previous disabled");
+		    	} else {
+		    		$("#prePage").attr("onclick", "getBaseInfoByPage(" + (data["currentPage"] - 1) + ")");
+		    	}
+		    	$('#loadingmodal').modal('hide');
+		    },
+		    error: function() {
+		    	$('#loadingmodal').modal('hide');
+		    }
+		});
+	}
+	
+	// 获取新增初登页面
+	function getBusinessType(id) {
+		var selectorid = '#' + id;
+		$(selectorid + ' option').remove();
+		$.get (
+			"${pageContext.request.contextPath}/dictIndex/get",
+			{dataType: "businessType"},
+			function(data) {
+				var select = '';
+				for(var key in data) {
+					select += '<option value="' + key + '" >' + data[key] + '</option>';
+				}
+				$(selectorid).append(select);
+			}
+		);
+	}
+	
+	// 变更确认
+	function modifyConfirm(registerinfostatus, reglogid) {
+		if (registerinfostatus == 'C') {
+			$('#modifyModalReglogid').val(reglogid);
+			$('#modifyModal').modal({
+		        keyboard: true
+		    });
+			return;
+		}
+		window.location.href = "<%=request.getContextPath()%>/regInfo/" + reglogid + "/editRegInfo";
+	}
+	
+	// 跳转到变更页面
+	function fowardTomodifyPage() {
+		if ($('#modifyModalReglogid').val() == '') {
+			return ;
+		}
+		window.location.href = "<%=request.getContextPath()%>/regInfo/editBaseInfo?reglogid=" + $('#modifyModalReglogid').val();
+	}
+	
+	$(document).ready(function() {
+		if ('${resultMsg}' != null && '${resultMsg}' != '') {
+			showHint('${resultMsg}', 'info');
+		}
+	});
+	
+	function deleteRegInfo() {
+		var deleteReglogid = $('#deleteReglogid').val();
+		$('#deleteReglogid').val('');
+		$.ajax({
+		    url: '${pageContext.request.contextPath}/regInfo/unableRegInfo',
+		    data: {"reglogid":deleteReglogid},
+		    type: 'POST',
+		    success: function(data) {
+		    	var resultCode = data["resultCode"];
+		    	var baseInfoList = data["baseInfoList"];
+		    	var resultMsg = data["resultMsg"];
+		    	if (resultCode == 'SUCCESS') {
+		    		window.location.href = "${pageContext.request.contextPath}/regInfo/listAll";		    	
+		    	} else {
+		    		$('#deleteRegInfoModal').modal('hide');
+			    	showHint("操作失败！" + resultMsg, "error");
+		    	}
+		    	
+		    },
+		    error: function(data) {
+		    	$('#deleteRegInfoModal').modal('hide');
+		    	showHint("操作失败！", "error");
+		    }
+		});
+	}
+	
+	function downloadTemplate() {
+		var businessType = $('#downloadBusinNoSelector option:selected').val();
+		$('#downloadTemplateModal').modal('hide');
+		$.ajax({
+			 url: '${pageContext.request.contextPath}/regInfo/validateTemplate',
+			    data: {businessType:businessType},
+			    type: 'GET',
+			    success: function(data) {
+			    	var resultCode = data["resultCode"];
+			    	var resultMsg = data["resultMsg"];
+			    	if (resultCode == "SUCCESS") {
+			    		if ($('#downloadIF') != null) {
+			    			var downloadIF = document.createElement("iframe");
+			    			downloadIF.name = "downloadIF";
+			    			downloadIF.id = "downloadIF";
+			    			downloadIF.style.display = "none";
+			    			document.body.appendChild(downloadIF);   
+			    		}
+			    		window.frames["downloadIF"].location.href="${pageContext.request.contextPath}/regInfo/downloadTemplate?businessType=" + businessType;
+			    	} else {
+			    		showHint(resultMsg, "error");
+			    	}
+			    },
+			    error: function() {
+			    	showHint("系统错误", "error");
+			    }
+		});
+	}
+	
+	
+	$(function () {
+	    $('#batchImportForm').ajaxForm({
+			type: 'POST',
+			url: '${pageContext.request.contextPath}/regInfo/batchImport',
+			success: function(data) {
+				var result = data["resultCode"];
+				var successList = data["successList"];
+				var resultMsg = data["resultMsg"];
+				if(result == "SUCCESS") {
+					getBaseInfoByPage(0);
+					for (var i=0; i<successList.length; ++i) {
+						showHint(successList[i] + "导入成功！");
+					}
+				} else {
+					showHint("导入失败，" + resultMsg, "error");
+				}
+				$('#loadingmodal').modal('hide');
+			},
+			error: function() {
+				showHint("导入失败，请检查模板数据！", 'error');
+				$('#loadingmodal').modal('hide');
+		    }
+		});
+	}); 
+	
+	function submitUpload() {
+		$('#loadingmodal').modal();
+		$('#uploadRegInfoModal').modal("hide");
+		$('#batchImportForm').submit();
+	}	
+</script>
+<!-- /JAVASCRIPTS -->
+</body>
+</html>
