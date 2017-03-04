@@ -1,402 +1,437 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
+<%@ page isELIgnored ="false"%>
+<!DOCTYPE html>
 <html lang="zh">
 <head>
-<title>动产融资统一登记系统接口程序 | 登记信息</title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" type="text/css" href="/css/cloud-admin.css" >
-<link rel="stylesheet" type="text/css"  href="/css/themes/default.css" id="skin-switcher" >
-<link rel="stylesheet" type="text/css"  href="/css/responsive.css" >
-
-<link href="/font-awesome/css/font-awesome.min.css" rel="stylesheet">
-<!-- DATE RANGE PICKER -->
-<link rel="stylesheet" type="text/css" href="/js/bootstrap-daterangepicker/daterangepicker-bs3.css" />
-<!-- TABLE CLOTH -->
-<link rel="stylesheet" type="text/css" href="/js/tablecloth/css/tablecloth.min.css" />
+	<title>动产融资统一登记系统接口程序 | 基本信息录入</title>
 </head>
 <body>
-
-<div class="box-body" >
-	<div>
-		<!-- BOX -->
-		<shiro:hasAnyRoles name="03,04">
-			<%@include file="queryCreditInfo.jsp" %>
-		</shiro:hasAnyRoles>
+<!-- FORMS -->
+<div class="row">
+	<div class="col-md-12">
+		<!-- BASIC -->
 		<div class="box border blue">
 			<div class="box-title">
-				<h4><i class="fa fa-info"></i>登记信息</h4>
-				<div class="tools hidden-xs">
-					<shiro:hasAnyRoles name="03,04">
-					<a href="#queryItemModal" data-toggle="modal" class="config">
-						[&nbsp;<i class="fa fa-search">&nbsp;征信信息查询</i>]
-					</a>
-					<a href="#downloadTemplateModal" onclick="getBusinessType('downloadBusinNoSelector')" data-toggle="modal" class="config">
-						[&nbsp;<i class="fa fa-upload">&nbsp;模板下载</i>]
-					</a>
-					<a href="#uploadRegInfoModal" onclick="getBusinessType('uploadBusinNoSelector')" data-toggle="modal" class="config">
-						[&nbsp;<i class="fa fa-upload">&nbsp;批量导入</i>]
-					</a>
-					</shiro:hasAnyRoles>
-				</div>
+				<h4><i class="fa fa-bars"></i>填表人/基本信息</h4>
 			</div>
-			<div class="box-body">
-				<div class="btn-toolbar" style="margin-bottom:5px;">
-					<%@include file="baseInfoSearchForm.jsp" %>
-				    <%--  <a href="<%=request.getContextPath()%>/users/editUser"><button class="btn btn-primary"><i class="fa fa-plus-circle"></i>&nbsp;&nbsp;批量导入</button></a>
-				    <button onclick='getBusinessType();' class="btn btn-primary"><i class="fa fa-plus-circle"></i>&nbsp;&nbsp;模板下载</button> --%>
-				  <div class="btn-group">
-				  </div>
-				</div>
-				<table class="table table-hover" id="table" style="text-align:center;">
-					<thead>
-					  <tr>
-					  	<%-- <th><%=request.getHeader("Referer")%></th> --%>
-						<th style="text-align:center;">序号</th>
-						<th style="text-align:center;">分行号</th>
-						<th style="text-align:center;">网点号</th>
-						<th style="text-align:center;">业务状态</th>
-						<th style="text-align:center;">业务编号</th>
-						<th style="text-align:center;">业务类型</th>
-						<th style="text-align:center;">处理状态</th>
-						<th style="text-align:center;">业务历程</th>
-						<th style="text-align:center;">操作</th>
-					  </tr>
-					</thead>
-					<tbody id="tbody_regInfo">
-			      		<tr v-for="(index, baseInfo) in baseInfoList">
-				          <td style="vertical-align:middle;">{{ (index + 1) }}</td>
-				          <td style="vertical-align:middle;">{{ baseInfo.departmentno }}</td>
-				          <td style="vertical-align:middle;">{{ baseInfo.brandno }}</td>
-				          <td style="vertical-align:middle;"><a href="<%=request.getContextPath()%>/regInfo/getRegInfoDetail?reglogid={{ baseInfo.reglogid }}">{{ baseInfo.registertypeName }}</a></td>
-				          <td style="vertical-align:middle;">{{ baseInfo.businessno }}</td>
-				          <td style="vertical-align:middle;">{{ baseInfo.businesstypeName }}</td>
-				          <td style="vertical-align:middle;">{{ baseInfo.registerinfostatusName }}</td>
-				          <td style="vertical-align:middle;">
-								<template v-for=" baseInfoHis in baseInfo.busiHistory ">
-								<a href="<%=request.getContextPath()%>/regInfo/getRegInfoDetail?reglogid={{ baseInfoHis.reglogid }}">[{{ baseInfoHis.registertypeName }}]</a><br/>
-								</template>
-						  </td>
-				          <td  style="vertical-align: middle;">
-				          		<template v-if=" (strContain(loginUser.userRole,'03') || strContain(loginUser.userRole,'04')) ">
-				          			<%-- 不展示条件：展期且未报送、注销、 --%>
-				          			<template v-if=" !((baseInfo.registertype == '03' && baseInfo.registerinfostatus != 'C') || (baseInfo.registertype == '04')) ">
-				          				<a href="#" onclick="modifyConfirm('{{ baseInfo.registerinfostatus }}', '{{ baseInfo.reglogid }}'); "><i class="fa fa-pencil-square-o" aria-hidden="true"></i>&nbsp;修改</a><br/>
-				          			</template>
-				          			<template v-if=" baseInfo.registertype == '03' && baseInfo.registerinfostatus != 'C'">
-				          				<a href="<%=request.getContextPath()%>/regInfo/editBaseInfo?reglogid={{ baseInfo.reglogid }}" "><i class="fa fa-pencil-square-o" aria-hidden="true"></i>&nbsp;修改</a><br/>
-				          			</template>
-				          			
-				          			<%-- 展示条件：初登未报送 --%>
-				          			<template v-if=" baseInfo.registertype == '01' && baseInfo.registerinfostatus != 'C' ">
-				          				<a href="#deleteRegInfoModal" onclick="$('#deleteReglogid').val('{{ baseInfo.reglogid }}');" role="button" data-toggle="modal" ><i class="fa fa-times" aria-hidden="true"></i>&nbsp;删除</a>
-				          			</template>
-				          		</template>
-				          </td>
-				        </tr>
-					</tbody>
-				  </table>
-				  <ul class="pager" id="pager_id">
-					<!-- <li class="previous" id="prePage" onclick="getBaseInfoByPage({{ currentPage - 1 }});"><a  href="javascript:void(0);" >&larr; 上一页</a></li>
-					<li class="next" id="nextPage" onclick="getBaseInfoByPage({{ currentPage + 1 }});"><a  href="javascript:void(0);" >下一页 &rarr;</a></li> -->
-					
-					<input type="hidden" id="currentPage" value="{{ currentPage }}"/>
-					<li class="previous" id="prePage" ><a href="javascript:void(0);" >&larr; 上一页</a></li>
-					<li class="next" id="nextPage" ><a  href="javascript:void(0);" >下一页 &rarr;</a></li>
-					<div style="margin-top:10px;color:#AEB2B5;">共有{{ totalCount }}条记录 页码：{{ currentPage + 1 }}/{{ totalPage }}</div>
-				  </ul>
+			<div class="box-body big" id="editBaseInfoId">
+				<form role="form" id="baseInfoForm" method="post" modelAttribute="baseInfo" >
+					<input type="hidden" name="reglogid" id="reglogid" value="${baseInfo.reglogid}"/>
+					<input type="hidden" id="registertime" value="${baseInfo.registertime}"/>
+					<input type="hidden" id="lastestRecord" value="${baseInfo.lastestRecord}"/>
+					<input type="hidden" id="recordStatus" value="${baseInfo.recordStatus}"/>
+					<input type="hidden" id="lastregistertype" value="${baseInfo.registertype}"/>
+					<input type="hidden" id="currentTime" value="${currentTime}"/>
+					<input type="hidden" id="betweenDays" value="${betweenDays}"/>
+					<c:if test="${baseInfo.departmentno == null || baseInfo.departmentno == ''}">
+						<div class="form-group">
+							<label for="departmentno">分行号*</label>
+							<input type="text" class="form-control" name="departmentno" id="departmentno" placeholder="分行号" value="${user.depNo}" disabled>
+						</div>
+					</c:if>
+
+					<c:if test="${baseInfo.brandno == null || baseInfo.brandno == ''}">
+						<div class="form-group" >
+							<label for="brandno">网点号*</label>
+							<%-- <input type="text" class="form-control" name="brandno" id="brandno" placeholder="网点号" value="${baseInfo.brandno}"> --%>
+							<select class="form-control" name="brandno" id="brandnoSelector" >
+								<shiro:hasAnyRoles name="03">
+									<option v-for="(brandno, brandname) in brandnoList" :value="brandno"> {{ brandno }}：{{ brandname }} </option>
+								</shiro:hasAnyRoles>
+								<shiro:hasAnyRoles name="04">
+									<option v-for="(brandno, brandname) in brandnoList" :value="brandno" v-if="brandno == '${loginUser.brandNo}'" selected>
+										{{ brandno }}：{{ brandname }}
+									</option>
+									<%-- <option v-for="brandno in brandnoList" :value="brandno" v-if="brandno != '${loginUser.brandNo}'">
+									{{ brandno }}
+								</option> --%>
+								</shiro:hasAnyRoles>
+								<script type="text/javascript">
+									$(document).ready(function(){
+										$.ajax({
+											type: "GET",
+											url:"<%=request.getContextPath()%>/manager/branchManager/getBranchByDepno",
+											data:{depno:$('#departmentno').val()},
+											async: false,
+											success: function(data) {
+												vue_brandnoSelector.brandnoList = data;
+											},
+											error: function() {
+												showHint('系统错误！', 'error');
+											}
+										});
+									});
+								</script>
+
+							</select>
+						</div>
+					</c:if>
+
+					<div class="form-group" style="margin-bottom:45px;">
+						<input type="hidden" id="lastTimeLimit" value="${baseInfo.timelimit}"/>
+						<label for="timelimit">登记期限*</label>
+						<select id="timelimit" name="timelimit" class="col-md-12 form-control" <c:if test="${baseInfo.timelimit != null && baseInfo.timelimit != ''}">disabled</c:if> >
+						<script type="text/javascript">
+							$(document).ready(function() {
+								var option = '';
+								for (var i=1; i<26; ++i) {
+									option += '<option value="' + i + '"';
+									if ('${baseInfo.registertype}' == '03' && ('${baseInfo.registerinfostatus}' == 'I' || '${baseInfo.registerinfostatus}' == 'G' || '${baseInfo.registerinfostatus}' == 'E')) {
+										if (i == '${baseInfo.extendtime}') {
+											option += 'selected';
+										}
+									} else {
+										if (i == $('#lastTimeLimit').val()) {
+											option += 'selected';
+										}
+									}
+									option += '>' + i + '年</option>';
+								}
+								$('#timelimit').append(option);
+								if ('${baseInfo.registertype}' == '03' && ('${baseInfo.registerinfostatus}' == 'I' || '${baseInfo.registerinfostatus}' == 'G' || '${baseInfo.registerinfostatus}' == 'E')) {
+									$('#timelimit').attr('disabled', false);
+								}
+							});
+						</script>
+						</select>
+					</div>
+
+					<c:if test="${baseInfo.departmentno != null && baseInfo.departmentno != ''}">
+						<div class="form-group">
+							<label for="authorizationuser">授权人*</label>
+							<input type="text" class="form-control" name="authorizationuser" id="authorizationuser" placeholder="授权人" value="${baseInfo.authorizationuser}">
+						</div>
+
+						<div class="form-group" style="margin-bottom:45px;">
+							<label for="registertype">修改类型*</label>
+							<select id="registertype" name="registertype" class="col-md-12 form-control" onchange="changeamendRegisterType()">
+								<script type="text/javascript">
+									$.get (
+											"${pageContext.request.contextPath}/dictIndex/get",
+											{dataType: "registerType"},
+											function(data) {
+												var option = '';
+												for(var key in data) {
+													if (key == '01') {
+														continue;
+													}
+													if ('${baseInfo.registertype}' == '03' && ('${baseInfo.registerinfostatus}' == 'I' || '${baseInfo.registerinfostatus}' == 'G' || '${baseInfo.registerinfostatus}' == 'E') && key == '03') {
+														$('#registertype').attr('disabled', true);
+														option += '<option value="' + key + '" selected>' + data[key] + '</option>';
+													} else {
+														option += '<option value="' + key + '" >' + data[key] + '</option>';
+													}
+												}
+
+												$('#registertype').append(option);
+											}
+									);
+								</script>
+							</select>
+						</div>
+					</c:if>
+
+					<div class="form-group">
+						<label for="title">填表人归档号</label>
+						<input type="text" class="form-control" name="title" id="title" placeholder="填表人归档号" <c:if test="${baseInfo.departmentno != null && baseInfo.departmentno != ''}"> value="${baseInfo.title}"</c:if>>
+					</div>
+
+					<c:if test="${baseInfo.departmentno == null || baseInfo.departmentno == ''}">
+						<div class="form-group">
+							<label for="clientno">客户号 *</label>
+							<input type="text" class="form-control" name="clientno" id="clientno" placeholder="客户号" value="${baseInfo.clientno}">
+						</div>
+
+					</c:if>
+
+					<c:if test="${baseInfo.bankbusino == null || baseInfo.bankbusino == ''}">
+						<div class="form-group" style="margin-bottom:45px;">
+							<label for="bankbusino">银行业务种类*</label>
+							<select id="bankbusino" name="bankBusiNo" class="col-md-12 form-control" disabled>
+								<option value="MAU" selected>手工录入</option>
+								<option value="LON">信贷</option>
+								<option value="SME">小企业E家</option>
+							</select>
+						</div>
+					</c:if>
+
+					<c:if test="${baseInfo.businessno == null || baseInfo.businessno == ''}">
+						<div class="form-group">
+							<label for="businessno">业务编号*</label>
+							<input type="text" class="form-control" name="businessno" id="businessno" placeholder="业务编号" value="${baseInfo.businessno}">
+						</div>
+					</c:if>
+
+					<c:if test="${baseInfo.businesstype == null || baseInfo.businesstype == ''}">
+						<div class="form-group" style="margin-bottom:45px;">
+							<input type="hidden" value="${baseInfo.businesstype}"/>
+							<label for="businesstype">业务类型*</label>
+							<select id="businesstype" name="businesstype" class="col-md-12 form-control" >
+								<script type="text/javascript">
+									$(document).ready(function() {
+										$.get (
+												"${pageContext.request.contextPath}/dictIndex/get",
+												{dataType: "businessType"},
+												function(data) {
+													var option = '';
+													for(var key in data) {
+														option += '<option value="' + key + '" >' + data[key] + '</option>';
+													}
+													$('#businesstype').append(option);
+												}
+										);
+									});
+								</script>
+							</select>
+						</div>
+					</c:if>
+
+					<div class="separator"></div>
+				</form>
+				<button id="btn_baseInfoFormSubmit" onclick="confirm();" class="btn btn-success">保存&下一步</button>
 			</div>
 		</div>
-		<!-- /BOX -->
-			</div>
-		</div>
-		<!-- /BORDERED HOVER -->
-	<div class="modal fade" id="uploadRegInfoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display:none;">
-		<div class="modal-dialog">
-		  <div class="modal-content">
-			<div class="modal-header">
-			  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			  <h4 class="modal-title">请选择模板文件</h4>
-			</div>
-			<form id="batchImportForm" method="POST" enctype="multipart/form-data">
-				<div class="modal-body" style="font-size:15px;">
-					<input name="batchImportfile" type="file" >
-				</div>
-				
-			</form>
-			<div class="modal-footer">
-			  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-			  <button type="button" onclick="submitUpload();" class="btn btn-primary">确认</button>
-			</div>
-		  </div>
-		</div>
+		<!-- /BASIC -->
 	</div>
-	
-	<div class="modal fade" id="downloadTemplateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display:none;">
-		<div class="modal-dialog">
-		  <div class="modal-content">
-			<div class="modal-header">
-			  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			  <h4 class="modal-title">请选择模板业务类型</h4>
-			</div>
-			<div class="modal-body" style="padding-bottom:40px;">
-			  	<select id='downloadBusinNoSelector' class="col-md-12 form-control" >
-				</select>
-			</div>
-			<div class="modal-footer">
-			  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-			  <button type="button" onclick='downloadTemplate()' class="btn btn-primary">确认</button>
-			</div>
-		  </div>
-		</div>
-	</div>
-	
-	<div class="modal fade" id="deleteRegInfoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-		  <div class="modal-content">
-			<div class="modal-header">
-			  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			  <h4 class="modal-title">提示</h4>
-			</div>
-			<input id="deleteReglogid" type="hidden" value=""/>
-			<div class="modal-body" style="font-size:15px;">
-			  确定不报送该记录？
-			</div>
-			<div class="modal-footer">
-			  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-			  <a href="#" onclick="window.location.href='<%=request.getContextPath()%>/regInfo/unableRegInfo?reglogid=' + $('#deleteReglogid').val()" ><button type="button"  class="btn btn-primary">确认</button></a>
-			</div>
-		  </div>
-		</div>
-	</div>
-	
-	<div class="modal fade" id="modifyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-		  <div class="modal-content">
-			<div class="modal-header">
-			  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			  <h4 class="modal-title">提示</h4>
-			</div>
-			<input id="modifyModalReglogid" type="hidden" value="" />
-			<div class="modal-body" style="font-size:15px;">
-				登记信息为已报送状态，除了注销操作，其他修改，则将产生费用。变更登记费用为40元/笔。展期登记为100元/笔/年。确定修改？
-			</div>
-			<div class="modal-footer">
-			  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-			  <a href="#"><button type="button" class="btn btn-primary" onclick="fowardTomodifyPage();">确认</button></a>
-			</div>
-		  </div>
-		</div>
-	</div>
-	
-	<div class="" style="overflow:auto; position:fixed;top:50%; left:50%; z-index:1040" id="loadingmodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		<img src="${pageContext.request.contextPath}/static/img/loaders/17.gif">
-	</div>
-	
 </div>
-<script src="/js/jquery/jquery-form.js"></script>
+<!-- /FORMS -->
+<div class="separator"></div>
+
+<div class="modal fade" id="AmendModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title">提示</h4>
+			</div>
+			<div id="hintMsg" class="modal-body" style="font-size:15px;">
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button id="confirm" type="button" class="btn btn-primary" onclick="submit();" data-dismiss="modal">确认</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
 <script type="text/javascript">
-	var vue_tbody_regInfo = new Vue({
-		el: '#tbody_regInfo',
+	var vue_brandnoSelector = new Vue({
+		el: '#brandnoSelector',
 		data: {
-			baseInfoList: [],
-			loginUser:null
-		},
-		methods: {
-			strContain: function(mainStr, subStr) {
-				return mainStr.indexOf(subStr) > -1;
-			}
+			brandnoList: []
 		}
 	});
-	
-	var vue_pager_id = new Vue({
-		el: '#pager_id',
-		data: {
-			beginindex: 1,
-			endindex:15,
-			totalCount:0,
-			currentPage:1,
-			totalPage:1
-		}
-	});
-		
-	$(document).ready(function() {
-		getBaseInfoByPage(0);
-	});
+
 </script>
-
 <script type="text/javascript">
-
-	function getBaseInfoByPage(page) {
-		$('#loadingmodal').modal();
-		
-		var brandno = $('#lastbrandno').val(); 
-		var clientno = $('#lastclientno').val(); 
-		var businessno = $('#lastbusinessno').val(); 
-		var businesstype = $('#lastbusinesstype').val(); 
-		var registerinfostatus = $('#lastregisterinfostatus').val();
-		
-		$('#pager_id').css('display', '');
-		$("#nextPage").attr("class", "next");
-		$("#prePage").attr("class", "previous");
-		$("#nextPage").removeAttr("onclick");
-		$("#prePage").removeAttr("onclick");
-		$.ajax({
-		    url: '${pageContext.request.contextPath}/regInfo/getAll',
-		    data: {page:page, brandno:brandno, clientno:clientno, businessno:businessno, businesstype:businesstype, registerinfostatus:registerinfostatus},
-		    type: 'GET',
-		    success: function(data) {
-		    	vue_tbody_regInfo.baseInfoList = data["baseInfoList"];
-		    	vue_tbody_regInfo.loginUser = data["loginUser"];
-		    	vue_pager_id.totalCount = data["totalCount"];
-		    	vue_pager_id.currentPage = data["currentPage"];
-		    	vue_pager_id.totalPage = data["totalPage"];
-		    	if (data["currentPage"] + 1 >= data["totalPage"]) {
-		    		$("#nextPage").attr("class", "next disabled");
-		    	} else {
-		    		$("#nextPage").attr("onclick", "getBaseInfoByPage(" + (data["currentPage"] + 1) + ")");
-		    	}
-				if (data["currentPage"] <= 0) {
-					$("#prePage").attr("class", "previous disabled");
-		    	} else {
-		    		$("#prePage").attr("onclick", "getBaseInfoByPage(" + (data["currentPage"] - 1) + ")");
-		    	}
-		    	$('#loadingmodal').modal('hide');
-		    },
-		    error: function() {
-		    	$('#loadingmodal').modal('hide');
-		    }
-		});
-	}
-	
-	// 获取新增初登页面
-	function getBusinessType(id) {
-		var selectorid = '#' + id;
-		$(selectorid + ' option').remove();
-		$.get (
-			"${pageContext.request.contextPath}/dictIndex/get",
-			{dataType: "businessType"},
-			function(data) {
-				var select = '';
-				for(var key in data) {
-					select += '<option value="' + key + '" >' + data[key] + '</option>';
-				}
-				$(selectorid).append(select);
-			}
-		);
-	}
-	
-	// 变更确认
-	function modifyConfirm(registerinfostatus, reglogid) {
-		if (registerinfostatus == 'C') {
-			$('#modifyModalReglogid').val(reglogid);
-			$('#modifyModal').modal({
-		        keyboard: true
-		    });
-			return;
+	function changeamendRegisterType() {
+		if ($('#registertype option:selected').val() == '03') {
+			$('#timelimit').attr("disabled", false);
+		} else {
+			$('#timelimit').attr("disabled", true);
 		}
-		window.location.href = "<%=request.getContextPath()%>/regInfo/" + reglogid + "/editRegInfo";
 	}
-	
-	// 跳转到变更页面
-	function fowardTomodifyPage() {
-		if ($('#modifyModalReglogid').val() == '') {
+
+	function confirm() {
+		$("#hintMsg p").remove();
+		var lastregistertype = $('#lastregistertype').val();
+		var registertype_input_status = $('#registertype').attr('disabled');
+		var registertype = $('#registertype option:selected').val();
+
+		if (registertype == null) {
+			submit();
 			return ;
 		}
-		window.location.href = "<%=request.getContextPath()%>/regInfo/editBaseInfo?reglogid=" + $('#modifyModalReglogid').val();
-	}
-	
-	$(document).ready(function() {
-		if ('${resultMsg}' != null && '${resultMsg}' != '') {
-			showHint('${resultMsg}', 'info');
-		}
-	});
-	
-	function deleteRegInfo() {
-		var deleteReglogid = $('#deleteReglogid').val();
-		$('#deleteReglogid').val('');
-		$.ajax({
-		    url: '${pageContext.request.contextPath}/regInfo/unableRegInfo',
-		    data: {"reglogid":deleteReglogid},
-		    type: 'POST',
-		    success: function(data) {
-		    	var resultCode = data["resultCode"];
-		    	var baseInfoList = data["baseInfoList"];
-		    	var resultMsg = data["resultMsg"];
-		    	if (resultCode == 'SUCCESS') {
-		    		window.location.href = "${pageContext.request.contextPath}/regInfo/listAll";		    	
-		    	} else {
-		    		$('#deleteRegInfoModal').modal('hide');
-			    	showHint("操作失败！" + resultMsg, "error");
-		    	}
-		    	
-		    },
-		    error: function(data) {
-		    	$('#deleteRegInfoModal').modal('hide');
-		    	showHint("操作失败！", "error");
-		    }
-		});
-	}
-	
-	function downloadTemplate() {
-		var businessType = $('#downloadBusinNoSelector option:selected').val();
-		$('#downloadTemplateModal').modal('hide');
-		$.ajax({
-			 url: '${pageContext.request.contextPath}/regInfo/validateTemplate',
-			    data: {businessType:businessType},
-			    type: 'GET',
-			    success: function(data) {
-			    	var resultCode = data["resultCode"];
-			    	var resultMsg = data["resultMsg"];
-			    	if (resultCode == "SUCCESS") {
-			    		if ($('#downloadIF') != null) {
-			    			var downloadIF = document.createElement("iframe");
-			    			downloadIF.name = "downloadIF";
-			    			downloadIF.id = "downloadIF";
-			    			downloadIF.style.display = "none";
-			    			document.body.appendChild(downloadIF);   
-			    		}
-			    		window.frames["downloadIF"].location.href="${pageContext.request.contextPath}/regInfo/downloadTemplate?businessType=" + businessType;
-			    	} else {
-			    		showHint(resultMsg, "error");
-			    	}
-			    },
-			    error: function() {
-			    	showHint("系统错误", "error");
-			    }
-		});
-	}
-	
-	
-	$(function () {
-	    $('#batchImportForm').ajaxForm({
-			type: 'POST',
-			url: '${pageContext.request.contextPath}/regInfo/batchImport',
-			success: function(data) {
-				var result = data["resultCode"];
-				var successList = data["successList"];
-				var resultMsg = data["resultMsg"];
-				if(result == "SUCCESS") {
-					getBaseInfoByPage(0);
-					for (var i=0; i<successList.length; ++i) {
-						showHint(successList[i] + "导入成功！");
+
+		var betweenDays = $('#betweenDays').val();
+		var hintMsg;
+		if (lastregistertype == "04") {
+			hintMsg = "操作失败，登记信息已被注销！";
+			$('#confirm').css("display", "none");
+		} else if (betweenDays < 0 ) {
+			hintMsg = "登记信息超过登记期限";
+			$('#confirm').css("display", "none");
+		} else {
+			$('#confirm').css("display", "")
+			switch(registertype) {
+				case "02":
+					// 变更登记
+					hintMsg = "确定变更（注：变更费用为40元/笔）？"
+					break;
+				case "03":
+					// 展期登记
+					if (betweenDays > 90) {
+						// 超过期限
+						hintMsg = "展期需在登记信息登记到期日前90天内操作";
+						$('#confirm').css("display", "none");
+						break;
 					}
-				} else {
-					showHint("导入失败，" + resultMsg, "error");
-				}
-				$('#loadingmodal').modal('hide');
-			},
-			error: function() {
-				showHint("导入失败，请检查模板数据！", 'error');
-				$('#loadingmodal').modal('hide');
-		    }
+					hintMsg = "确定展期（注：展期费用为100元/笔/年）？"
+					break;
+				case "04":
+					// 注销登记
+					hintMsg = "确定注销？"
+					break;
+			}
+		}
+		$("#hintMsg").append("<p>" + hintMsg + "</p>");
+		$('#AmendModal').modal({
+			keyboard: true
 		});
-	}); 
-	
-	function submitUpload() {
-		$('#loadingmodal').modal();
-		$('#uploadRegInfoModal').modal("hide");
-		$('#batchImportForm').submit();
-	}	
+	}
+
+	function submit() {
+		$('#baseInfoForm').submit();
+	}
+
+	$(document).ready(function() {
+		jQuery.validator.addMethod("isFormatDate", function (value, element) {
+			var tel = /[0-9]{4}\-[0-1][0-9]\-[0-3][0-9]/;
+			return this.optional(element) || (tel.test(value));
+		}, "请正确填写日期，日期格式为：yyyy-MM-dd");
+		jQuery.validator.addMethod("isBrandno", function (value, element) {
+			var tel = /^[0-9]{0,6}$/;
+			return this.optional(element) || (tel.test(value));
+		}, "请正确填写网点号，为数字格式");
+		jQuery.validator.addMethod("byteMaxLength", function (value, element, param) {
+			var length = value.length;
+			for (var i = 0; i < value.length; i++) {
+				if (value.charCodeAt(i) > 127) {
+					length += 2;
+				}
+			}
+			return this.optional(element) || (length <= param);
+		}, $.validator.format("请确保输入的值小于{0}个字节(一个中文字算3个字节)"));
+
+		jQuery.validator.addMethod("isNotSpcSimpol", function (value, element) {
+			var chinese = /^([a-z]|[A-Z]|[0-9]|[\u4e00-\u9fa5])+$/;
+			return (chinese.test(value)) || this.optional(element);
+		}, "不能输入特殊字符");
+
+		jQuery.validator.addMethod("isNotChinese", function (value, element) {
+			var chinese = /^([a-z]|[A-Z]|[0-9])+$/;
+			return (chinese.test(value)) || this.optional(element);
+		}, "只能输入英文字母和数字");
+
+		$('#baseInfoForm').validate({
+			rules: {
+				departmentno: {
+					required:true
+				},
+				brandno: {
+					required:true,
+					byteMaxLength:6,
+					isBrandno:true
+				},
+				authorizationuser: {
+					required:true,
+					byteMaxLength:16,
+					isNotSpcSimpol:true
+				},
+				timelimit: {
+					required:true
+				},
+				registertype: {
+					required:true
+				},
+				title: {
+					byteMaxLength:40,
+					isNotSpcSimpol:true
+				},
+				clientno: {
+					required:true,
+					byteMaxLength:10,
+					isNotChinese:true
+				},
+				bankBusiNo: {
+					required:true
+				},
+				businessno: {
+					required:true,
+					byteMaxLength:32,
+					isNotChinese:true
+				},
+				businesstype: {
+					required:true
+				}
+			},
+			messages: {
+				departmentno: {
+					required:"请输入分行号！"
+				},
+				brandno: {
+					required:"请输入网点号！"
+				},
+				authorizationuser: {
+					required:"请输入授权人！"
+				},
+				timelimit: {
+					required:"请选择期限！"
+				},
+				registertype: {
+					required:"请选择登记类型！"
+				},
+				clientno: {
+					required:"请输入客户号！"
+				},
+				bankBusiNo: {
+					required:"请选择银行业务种类！"
+				},
+				businessno: {
+					required:"请输入业务编号！"
+				},
+				businesstype: {
+					required:"请选择业务类型！"
+				}
+			},
+			submitHandler: function(form) {
+				$('#btn_baseInfoFormSubmit').attr("disabled", true).text("正在提交");
+				var url = "<%=request.getContextPath()%>/regInfo/editBaseInfo";
+				if ('${baseInfo.registertype}' == '03' && ('${baseInfo.registerinfostatus}' == 'I' || '${baseInfo.registerinfostatus}' == 'G' || '${baseInfo.registerinfostatus}' == 'E')) {
+					$('#registertype').attr("disabled", false);
+					url = "<%=request.getContextPath()%>/regInfo/updateBaseInfoAjax";
+				}
+				$.ajax({
+					type: "POST",
+					url:url,
+					data:$('#baseInfoForm').serialize(),
+					async: false,
+					success: function(data) {
+						var resultMsg = data["resultMsg"];
+						var resultCode = data["resultCode"];
+						if (resultCode == 'SUCCESS') {
+							var redirectUrl = data["redirectUrl"];
+							window.location.href = "<%=request.getContextPath()%>" + redirectUrl;
+						} else {
+							showHint(resultMsg, "error");
+							$('#btn_baseInfoFormSubmit').attr("disabled", false).text("保存");
+							if ('${baseInfo.registertype}' == '03' && ('${baseInfo.registerinfostatus}' == 'G' || '${baseInfo.registerinfostatus}' == 'E')) {
+								$('#registertype').attr("disabled", true);
+								url = "<%=request.getContextPath()%>/regInfo/updateBaseInfoAjax";
+							}
+						}
+					},
+					error: function(data) {
+						showHint("系统错误！", "error");
+						$('#btn_baseInfoFormSubmit').attr("disabled", false).text("保存");
+						if ('${baseInfo.registertype}' == '03' && ('${baseInfo.registerinfostatus}' == 'G' || '${baseInfo.registerinfostatus}' == 'E')) {
+							$('#registertype').attr("disabled", true);
+							url = "<%=request.getContextPath()%>/regInfo/updateBaseInfoAjax";
+						}
+					}
+				});
+			}
+		});
+	});
+
 </script>
-<!-- /JAVASCRIPTS -->
+
+
+<!-- Placed at the end of the document so the pages load faster -->
 </body>
 </html>

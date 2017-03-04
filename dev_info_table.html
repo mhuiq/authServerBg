@@ -17,6 +17,18 @@
 	<link rel="stylesheet" type="text/css" href="js/bootstrap-daterangepicker/daterangepicker-bs3.css" />
 	<!-- TABLE CLOTH -->
 	<link rel="stylesheet" type="text/css" href="js/tablecloth/css/tablecloth.min.css" />
+
+	<!-- ANIMATE -->
+	<link rel="stylesheet" type="text/css" href="css/animatecss/animate.min.css" />
+	<!-- HUBSPOT MESSENGER -->
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-spinner.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-air.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-block.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-flat.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-future.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-ice.min.css" />
+
 </head>
 <body>
 	<!-- HEADER -->
@@ -67,17 +79,11 @@
 
 					<!-- SIDEBAR MENU -->
 					<ul>
-						<li>
-							<a href="index.html">
-							<i class="fa fa-tachometer fa-fw"></i> <span class="menu-text">首页</span>
-							<span class="selected"></span>
-							</a>
-						</li>
 						<li class="has-sub active">
 							<a href="javascript:;" class="">
-							<i class="fa fa-table fa-fw"></i> <span class="menu-text">数据表</span>
-							<span class="arrow open"></span>
-							<span class="selected"></span>
+								<i class="fa fa-table fa-fw"></i> <span class="menu-text">数据表</span>
+								<span class="arrow open"></span>
+								<span class="selected"></span>
 							</a>
 							<ul class="sub">
 								<li><a class="" href="dev_info_table.html"><span class="sub-menu-text">设备信息表</span></a></li>
@@ -86,8 +92,6 @@
 								<li><a class="" href="house_info_table.html"><span class="sub-menu-text">房屋信息表</span></a></li>
 							</ul>
 						</li>
-						<li style="display: none"><a class="" href="widgets_box.html"><i class="fa fa-th-large fa-fw"></i> <span class="menu-text">Widgets & Box</span></a></li>
-						</li>
 					</ul>
 					<!-- /SIDEBAR MENU -->
 				</div>
@@ -95,26 +99,30 @@
 			<!-- /SIDEBAR -->
 		<div id="main-content">
 			<!-- SAMPLE BOX CONFIGURATION MODAL FORM-->
-			<div class="modal fade" id="addUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 				<div class="modal-dialog">
 				  <div class="modal-content">
 					<div class="modal-header">
 					  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					  <h4 class="modal-title">添加用户信息</h4>
+					  <h4 class="modal-title">添加设备信息</h4>
 					</div>
 					<div class="modal-body">
-						<form id="addUserForm">
+						<form id="addForm">
 							<div class="form-group">
-								<label for="idcard">身份证号</label>
-								<input type="text" class="form-control" name="idcard" id="idcard" placeholder="身份证号" required>
+								<label for="appid">设备Mac</label>
+								<input type="text" class="form-control" name="appid" id="appid" placeholder="设备Mac" required>
 							</div>
 							<div class="form-group">
-								<label for="username">住户姓名</label>
-								<input type="text" class="form-control" name="username" id="username" placeholder="住户姓名" required>
+								<label for="houseSelectorId">房屋信息</label>
+								<select class="form-control" name="houseid" id="houseSelectorId" >
+									<option v-for="houseInfo in houseInfoMap" :value="houseInfo.HOUSEID" >
+										{{ houseInfo.HOUSEINFO }}
+									</option>
+								</select>
 							</div>
 							<div class="form-group">
-								<label for="imagepath">图像地址</label>
-								<input type="text" class="form-control" name="imagepath" id="imagepath" placeholder="图像地址" required>
+								<label for="APPINFO">设备信息</label>
+								<input type="text" class="form-control" name="appinfo" id="appinfo" placeholder="设备信息" required>
 							</div>
 							<div class="form-group">
 								<label for="mobilephone">联系电话</label>
@@ -124,27 +132,27 @@
 					</div>
 					<div class="modal-footer">
 					  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-					  <button type="button" class="btn btn-primary" onclick="saveUser()">保存</button>
+					  <button type="button" class="btn btn-primary" onclick="save()">保存</button>
 					</div>
 				  </div>
 				</div>
 			  </div>
 			<!-- /SAMPLE BOX CONFIGURATION MODAL FORM-->
 
-            <div class="modal fade" id="deleteUserConfirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal fade" id="deleteConfirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                             <h4 class="modal-title">注意</h4>
                         </div>
-                        <input type="hidden" id="deleteUserIdCard"/>
+                        <input type="hidden" id="deleteId"/>
                         <div class="modal-body">
                             确认删除该信息？
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                            <button type="button" class="btn btn-primary" onclick="deleteUser()">确定</button>
+                            <button type="button" class="btn btn-primary" onclick="deleteInfo()">确定</button>
                         </div>
                     </div>
                 </div>
@@ -169,13 +177,13 @@
 										<li>
 											<a href="#">数据表</a>
 										</li>
-										<li>用户信息表</li>
+										<li>设备信息表</li>
 									</ul>
 									<!-- /BREADCRUMBS -->
 									<div class="clearfix">
-										<h3 class="content-title pull-left">用户信息表</h3>
+										<h3 class="content-title pull-left">设备信息表</h3>
 									</div>
-									<div class="description">记录住户信息</div>
+									<div class="description">记录设备信息</div>
 								</div>
 							</div>
 						</div>
@@ -187,9 +195,9 @@
 								<!-- BOX -->
 								<div class="box border blue">
 									<div class="box-title">
-										<h4><i class="fa fa-table"></i>住户信息</h4>
+										<h4><i class="fa fa-table"></i>设备信息</h4>
 										<div class="tools">
-                                            <a href="#addUser" data-toggle="modal" class="config">
+                                            <a href="#addModal" onclick="getHouseInfo();" data-toggle="modal" class="config">
 												<i class="fa fa-plus-circle">&nbsp;新增</i>
 											</a>
 										</div>
@@ -199,22 +207,24 @@
 											<thead>
 											  <tr>
 												<th>序号</th>
-												<th>身份证号</th>
-												<th>住户姓名</th>
-												<th>图像地址</th>
+												<th>设备MAC</th>
+											  	<th>设备信息</th>
+												<th>房屋信息</th>
+												<th>注册时间</th>
 											    <th>联系电话</th>
                                                 <th>操作</th>
 											  </tr>
 											</thead>
-											<tbody id="tbody_user_info">
-											  <tr v-for="(index, userInfo) in userInfoList">
+											<tbody id="tbody_dev_info">
+											  <tr v-for="(index, devInfo) in devInfoList">
 												<td>{{ (index + 1) }}</td>
-												<td>{{ userInfo.IDCARD }}</td>
-												<td>{{ userInfo.USERNAME }}</td>
-												<td>{{ userInfo.IMAGEPATH }}</td>
-											  	<td>{{ userInfo.MOBILEPHONE }}</td>
+												<td>{{ devInfo.APPID }}</td>
+												<td>{{ devInfo.APPINFO }}</td>
+												<td>{{ devInfo.HOUSEINFO }}</td>
+												<td>{{ devInfo.REGISTERTIME }}</td>
+											  	<td>{{ devInfo.MOBILEPHONE }}</td>
                                                 <td>
-                                                    <a href="javascrpt:void(0);" onclick="$('#deleteUserConfirm').modal();$('#deleteUserIdCard').val({{ userInfo.IDCARD }})" ><i class="fa fa-times" aria-hidden="true">&nbsp;删除</i></a>
+                                                    <a href="javascrpt:void(0);" onclick="$('#deleteConfirm').modal();$('#deleteId').val('{{ devInfo.APPID }}')" ><i class="fa fa-times" aria-hidden="true">&nbsp;删除</i></a>
                                                 </td>
 											  </tr>
 											</tbody>
@@ -254,12 +264,28 @@
 	<script type="text/javascript" src="js/jQuery-Cookie/jquery.cookie.min.js"></script>
 	<!-- VUE SCRIPT -->
 	<script type="text/javascript" src="js/vue.min.js"></script>
+
+	<!-- HUBSPOT MESSENGER -->
+	<script type="text/javascript" src="js/hubspot-messenger/js/messenger.min.js"></script>
+	<script type="text/javascript" src="js/hubspot-messenger/js/messenger-theme-flat.js"></script>
+	<script type="text/javascript" src="js/hubspot-messenger/js/messenger-theme-future.js"></script>
+	<script type="text/javascript" src="js/customs.js"></script>
+
 	<!-- /JAVASCRIPTS -->
+
+
 	<script type="text/javascript">
-		var vue_tbody_user_info = new Vue({
-			el: '#tbody_user_info',
+		var vue_houseSelector = new Vue({
+			el: '#houseSelectorId',
 			data: {
-				userInfoList: []
+				houseInfoMap: {}
+			}
+		});
+
+		var vue_tbody_dev_info = new Vue({
+			el: '#tbody_dev_info',
+			data: {
+				devInfoList: []
 			},
 			methods: {
 				strContain: function(mainStr, subStr) {
@@ -268,76 +294,92 @@
 			}
 		});
 
-		function getAllUser() {
+		function getAll() {
 			$.ajax({
-				url: 'http://localhost:9666/userInfo/getAll',
+				url: 'http://localhost:9666/devInfo/getAll',
 				type: 'GET',
 				dataType: 'JSONP',
 				jsonpCallback: 'jsonpCallback',
 				success: function(data) {
-					vue_tbody_user_info.userInfoList = data;
+					vue_tbody_dev_info.devInfoList = data;
 					$('#loadingmodal').modal('hide');
 				},
 				error: function() {
-					alert('系统出错！');
+					showHint('系统出错！', 'error');
 					$('#loadingmodal').modal('hide');
 				}
 			});
 		}
 
-		function saveUser() {
+		function save() {
 			$.ajax({
 				type: "GET",
 				dataType: "JSONP",
-				url: 'http://localhost:9666/userInfo/saveUser',
-				data: $('#addUserForm').serialize(),
+				url: 'http://localhost:9666/devInfo/save',
+				data: $('#addForm').serialize(),
+				jsonpCallback: 'jsonpCallback',
 				success: function (result) {
-                    $('#addUser').modal('hide');
+                    $('#addModal').modal('hide');
 					if (result.rtnCode != 'SUCCESS') {
-						alert('保存失败！' + result.rtnMsg);
+						showHint('保存失败！' + result.rtnMsg, 'error');
 						return;
 					}
-					alert('保存成功！');
+					showHint('保存成功！');
 					$('#loadingmodal').modal();
-					getAllUser();
+					getAll();
 				},
 				error: function() {
                     $('#addUser').modal('hide');
-                    alert('保存失败！');
+					showHint('保存失败！', 'error');
 				}
 			});
 		}
 
-		function deleteUser() {
+		function deleteInfo() {
             $.ajax({
                 type: "GET",
                 dataType: "JSONP",
-                url: 'http://localhost:9666/userInfo/deleteByIdCard',
-                data: {idCard:$('#deleteUserIdCard').val()},
+                url: 'http://localhost:9666/devInfo/deleteById',
+				jsonpCallback: 'jsonpCallback',
+                data: {appId:$('#deleteId').val()},
                 success: function (result) {
-                    $('#deleteUserConfirm').modal('hide');
+                    $('#deleteConfirm').modal('hide');
                     if (result.rtnCode != 'SUCCESS') {
-                        alert('保存失败！' + result.rtnMsg);
+						showHint('保存失败！' + result.rtnMsg, 'error');
                         return;
                     }
-                    alert('删除成功！');
+                    showHint('删除成功！', 'info');
                     $('#loadingmodal').modal();
-                    getAllUser();
+                    getAll();
                 },
                 error: function() {
-                    $('#deleteUserConfirm').modal('hide');
-                    alert('保存失败！');
+                    $('#deleteConfirm').modal('hide');
+					showHint('保存失败！', 'error');
                 }
             });
         }
 
-
+		function getHouseInfo() {
+			$.ajax({
+				type: "GET",
+				dataType: 'JSONP',
+				url: "http://localhost:9666/houseInfo/getAll",
+				jsonpCallback: 'jsonpCallback',
+				success: function(data) {
+					vue_houseSelector.houseInfoMap = data;
+				},
+				error: function() {
+					showHint('系统错误！', 'error');
+				}
+			});
+		}
 	</script>
+
 
 	<script type="text/javascript">
 		(function () {
 			$('#loadingmodal').modal();
-			getAllUser();
+			getAll();
 		})();
 	</script>
 </body>
