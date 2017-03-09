@@ -17,6 +17,16 @@
 	<link rel="stylesheet" type="text/css" href="js/bootstrap-daterangepicker/daterangepicker-bs3.css" />
 	<!-- TABLE CLOTH -->
 	<link rel="stylesheet" type="text/css" href="js/tablecloth/css/tablecloth.min.css" />
+	<!-- ANIMATE -->
+	<link rel="stylesheet" type="text/css" href="css/animatecss/animate.min.css" />
+	<!-- HUBSPOT MESSENGER -->
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-spinner.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-air.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-block.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-flat.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-future.min.css" />
+	<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-ice.min.css" />
 </head>
 <body>
 	<!-- HEADER -->
@@ -84,6 +94,7 @@
 								<li><a class="" href="user_info_table.html"><span class="sub-menu-text">用户信息表</span></a></li>
 								<li><a class="" href="auth_info_table.html"><span class="sub-menu-text">授权信息表</span></a></li>
 								<li><a class="" href="house_info_table.html"><span class="sub-menu-text">房屋信息表</span></a></li>
+								<li><a class="" href="visitors_info_table.html"><span class="sub-menu-text">访客信息表</span></a></li>
 							</ul>
 						</li>
 						<li style="display: none"><a class="" href="widgets_box.html"><i class="fa fa-th-large fa-fw"></i> <span class="menu-text">Widgets & Box</span></a></li>
@@ -254,6 +265,13 @@
 	<script type="text/javascript" src="js/jQuery-Cookie/jquery.cookie.min.js"></script>
 	<!-- VUE SCRIPT -->
 	<script type="text/javascript" src="js/vue.min.js"></script>
+
+	<!-- HUBSPOT MESSENGER -->
+	<script type="text/javascript" src="js/hubspot-messenger/js/messenger.min.js"></script>
+	<script type="text/javascript" src="js/hubspot-messenger/js/messenger-theme-flat.js"></script>
+	<script type="text/javascript" src="js/hubspot-messenger/js/messenger-theme-future.js"></script>
+	<script type="text/javascript" src="js/customs.js"></script>
+
 	<!-- /JAVASCRIPTS -->
 	<script type="text/javascript">
 		var vue_tbody_user_info = new Vue({
@@ -279,7 +297,7 @@
 					$('#loadingmodal').modal('hide');
 				},
 				error: function() {
-					alert('系统出错！');
+					showHint('系统出错！', 'error');
 					$('#loadingmodal').modal('hide');
 				}
 			});
@@ -294,16 +312,16 @@
 				success: function (result) {
                     $('#addUser').modal('hide');
 					if (result.rtnCode != 'SUCCESS') {
-						alert('保存失败！' + result.rtnMsg);
+						showHint('保存失败！' + result.rtnMsg, 'error');
 						return;
 					}
-					alert('保存成功！');
+                    showHint('保存成功！', 'info');
 					$('#loadingmodal').modal();
 					getAllUser();
 				},
 				error: function() {
                     $('#addUser').modal('hide');
-                    alert('保存失败！');
+                    showHint('保存失败！', 'error');
 				}
 			});
 		}
@@ -317,16 +335,16 @@
                 success: function (result) {
                     $('#deleteUserConfirm').modal('hide');
                     if (result.rtnCode != 'SUCCESS') {
-                        alert('保存失败！' + result.rtnMsg);
+                        showHint('保存失败！' + result.rtnMsg , 'error');
                         return;
                     }
-                    alert('删除成功！');
+                    showHint('删除成功！', 'info');
                     $('#loadingmodal').modal();
                     getAllUser();
                 },
                 error: function() {
                     $('#deleteUserConfirm').modal('hide');
-                    alert('保存失败！');
+                    showHint('保存失败！', 'error');
                 }
             });
         }

@@ -118,6 +118,14 @@
 								<input type="text" class="form-control" name="username" id="username" placeholder="访客姓名" required>
 							</div>
 							<div class="form-group">
+								<label for="imagepath">联系电话</label>
+								<input type="text" class="form-control" name="imagepath" id="imagepath" placeholder="图像地址" required>
+							</div>
+							<div class="form-group">
+								<label for="mobilephone">联系电话</label>
+								<input type="text" class="form-control" name="mobilephone" id="mobilephone" placeholder="访客姓名" required>
+							</div>
+							<div class="form-group">
 								<label for="houseSelectorId">房屋</label>
 								<select class="form-control" name="houseid" id="houseSelectorId" >
 									<option v-for="houseInfo in houseInfoMap" :value="houseInfo.HOUSEID" >
@@ -127,7 +135,7 @@
 							</div>
 							<div class="form-group">
 								<label for="validatetime">生效时间</label>
-								<input type="text" class="form-control" name="validatetime" id="validatetime" placeholder="生效时间yyyyMMddHHmmss" required>
+								<input type="text" class="form-control" name="validatetime" id="validatetime" placeholder="YYYYMMDDHHmmss" required>
 							</div>
 							<div class="form-group">
 								<label for="_duration">有效时长（分钟）</label>
@@ -214,6 +222,8 @@
 												<th>序号</th>
 												<th>访客身份证</th>
 												<th>访客姓名</th>
+												<th>图像地址</th>
+												<th>联系电话</th>
 												<th>房屋ID（备案号）</th>
 											  	<th>房屋信息</th>
 												<th>房屋地址</th>
@@ -227,6 +237,8 @@
 												<td>{{ (index + 1) }}</td>
 												<td>{{ visitorInfo.IDCARD }}</td>
 												<td>{{ visitorInfo.USERNAME }}</td>
+												<td>{{ visitorInfo.IMAGEPATH }}</td>
+												<td>{{ visitorInfo.MOBILEPHONE }}</td>
 												<td>{{ visitorInfo.HOUSEID }}</td>
 												<td>{{ visitorInfo.HOUSEINFO }}</td>
 											  	<td>{{ visitorInfo.HOUSEADDR }}</td>
