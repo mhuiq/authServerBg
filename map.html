@@ -26,33 +26,77 @@ p{
 	min-height:767px;
 }
 </style>
+<!-- ANIMATE -->
+<link rel="stylesheet" type="text/css" href="css/animatecss/animate.min.css" />
+<!-- HUBSPOT MESSENGER -->
+<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger.min.css" />
+<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-spinner.min.css" />
+<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-air.min.css" />
+<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-block.min.css" />
+<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-flat.min.css" />
+<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-future.min.css" />
+<link rel="stylesheet" type="text/css" href="js/hubspot-messenger/css/messenger-theme-ice.min.css" />
+
 <script charset="utf-8" src="http://map.qq.com/api/js?v=2.exp"></script>
-<script>
-function init(){
-    var center=new qq.maps.LatLng(22.679282,114.053192);
-    var map=new qq.maps.Map(document.getElementById("container"),{
-        center:center,
-        zoom:11
-    });
-    //添加定时器
-    setTimeout(function(){
-        var marker=new qq.maps.Marker({
-            // position:center,
-			position:new qq.maps.LatLng(22.535470,114.028838),
-			animation:qq.maps.MarkerAnimation.BOUNCE,
-            map:map
-        });
-		setTimeout(function() {
-			marker.setMap(null);
-		}, 6000);
-        //marker.setAnimation(qq.maps.Animation.DROP);
-    },2000);
-}
-window.onload=init;
-</script>
+
 </head>
 <body>
 <div id="container"></div>
 <p>两秒钟后一个marker从天而降</p>
+
+<!-- JQUERY -->
+<script src="js/jquery/jquery-2.0.3.min.js"></script>
+<!-- BOOTSTRAP -->
+<script src="bootstrap-dist/js/bootstrap.min.js"></script>
+<!-- HUBSPOT MESSENGER -->
+<script type="text/javascript" src="js/hubspot-messenger/js/messenger.min.js"></script>
+<script type="text/javascript" src="js/hubspot-messenger/js/messenger-theme-flat.js"></script>
+<script type="text/javascript" src="js/hubspot-messenger/js/messenger-theme-future.js"></script>
+<script type="text/javascript" src="js/customs.js"></script>
+<script>
+    function init() {
+        var i = 0;
+        // 22.610208,113.822479  22.608940,114.421234  22.709056,114.104004  22.518900,114.065552
+        var center=new qq.maps.LatLng(22.679282,114.053192);
+        var map=new qq.maps.Map(document.getElementById("container"),{
+            center:center,
+            zoom:11
+        });
+        //添加定时器
+        // setTimeout(function(){
+
+        //     //marker.setAnimation(qq.maps.Animation.DROP);
+        // },2000);
+
+        setInterval(function() {
+            var l = 22.518900 + Math.random() * 0.2;
+            var h = 113.822479 + Math.random();
+
+            Messenger.options = {
+                extraClasses: 'messenger-fixed messenger-on-left',
+                theme: 'air'
+            }
+            Messenger().post({
+                message: '<div style="float: left"><span>姓名：张三</span><br/><span>地址：南山区学府花园</span><br/><span>身份证号：' + Math.floor(Math.random()*448234199809081920+1) + '</span></div><div style="float: right"><img height="50px" width="50px" src="img/timg.jpeg"/></div>',
+                type: 'info',
+                showCloseButton: true
+            });
+
+            var marker=new qq.maps.Marker({
+                // position:center,
+
+                position:new qq.maps.LatLng(l, h),
+                animation:qq.maps.MarkerAnimation.BOUNCE,
+                map:map
+
+            });
+            setTimeout(function() {
+                marker.setMap(null);
+            }, 6000);
+            i++
+        }, 500);
+    }
+    window.onload=init;
+</script>
 </body>
 </html>
