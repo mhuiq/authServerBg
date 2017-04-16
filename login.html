@@ -86,7 +86,7 @@
 	<script>
 		function createWebSocket(sid) {
 			//建立连接
-			var ws = new WebSocket("ws://daoheqiankun.cn:9777");
+			var ws = new WebSocket("wss://daoheqiankun.cn/wss");
 			ws.onopen = function (e) {
 				var req = {};
 				req["opcode"] = "LOGINTOKEN";
@@ -102,13 +102,14 @@
 					case 'SNDTOKEN':
 						$.ajax({
 							async: 'true',
-							url: 'http://daoheqiankun.cn/auth/login/refreshCertToken',
+							url: 'https://daoheqiankun.cn/auth/login/refreshCertToken',
 							type: 'GET',
 							data: {'certToken':data['token']},
-							success: function(data) {
-								var respObj = JSON.parse(data);
+							success: function(resp) {
+								var respObj = JSON.parse(resp);
 								if (respObj['resultCode'] === 'success') {
-									var text = 'NSIdentifyApp://cert_token=' + data['token'] + '&mode=' + data['mode'];
+								    console.log(data['token']);
+									var text = 'NSIdentifyApp://cert_token=' + data['token'] + '&mode=0x40';
 									$('#qrcode canvas').remove();
 									$('#qrcode').qrcode({render: "canvas",width:200,height:200,text:text});
 								} else {
@@ -122,6 +123,14 @@
 						});
 
 						break;
+					case 'AUTHRESULT':
+					    if (data['isLogin']) {
+					        showHint('登陆成功！正在跳转到首页...');
+					        setTimeout(function () {
+								window.location.href = data['redirectUrl'];
+                            }, 1000);
+						}
+					    break;
 					default:
 						break;
 				}
@@ -137,7 +146,7 @@
 		$(document).ready(function() {
 			$.ajax({
 				async: 'true',
-				url: 'http://daoheqiankun.cn/auth/login/checklogin',
+				url: 'https://daoheqiankun.cn/auth/login/checklogin',
 				type: 'GET',
 				success: function(data) {
 					var respObj = JSON.parse(data);
@@ -146,6 +155,7 @@
 						window.location.href = respObj['redirectUrl'];
 					} else {
 						// 若未登录，则显示二维码
+                        document.cookie= 'sid=' + respObj['sid'] + ";path=/";
 						createWebSocket(respObj['sid']);
 					}
 				},

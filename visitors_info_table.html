@@ -298,7 +298,7 @@
 		});
 		(function () {
 			$.ajax({
-				url: 'http://daoheqiankun.cn/auth/login/getloginuser',
+				url: 'https://daoheqiankun.cn/auth/login/getloginuser',
 				type: 'GET',
 				async: false,
 				success: function(data) {
@@ -336,7 +336,7 @@
 
 		function getAll() {
 			$.ajax({
-				url: 'http://daoheqiankun.cn/auth/visitorsInfo/getAll',
+				url: 'https://daoheqiankun.cn/auth/visitorsInfo/getAll',
 				type: 'GET',
 //				dataType: 'JSONP',
 //				jsonpCallback: 'jsonpCallback',
@@ -356,7 +356,7 @@
 		function save() {
 			$.ajax({
 				type: "GET",
-				url: 'http://daoheqiankun.cn/auth/visitorsInfo/save',
+				url: 'https://daoheqiankun.cn/auth/visitorsInfo/save',
 				data: $('#addForm').serialize(),
 				success: function (result) {
 					checkLogin(result);
@@ -380,7 +380,7 @@
 		function deleteInfo() {
             $.ajax({
                 type: "GET",
-                url: 'http://daoheqiankun.cn/auth/visitorsInfo/deleteById',
+                url: 'https://daoheqiankun.cn/auth/visitorsInfo/deleteById',
                 data: {authid:$('#deleteId').val()},
                 success: function (result) {
 					checkLogin(result);
@@ -404,7 +404,7 @@
 		function getHouseInfo() {
 			$.ajax({
 				type: "GET",
-				url: "http://daoheqiankun.cn/auth/houseInfo/getAll",
+				url: "https://daoheqiankun.cn/auth/houseInfo/getAll",
 				success: function(data) {
 					checkLogin(data);
 					data = JSON.parse(data);

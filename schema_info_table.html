@@ -253,7 +253,7 @@
 		});
 		(function () {
 			$.ajax({
-				url: 'http://daoheqiankun.cn/auth/login/getloginuser',
+				url: 'https://daoheqiankun.cn/auth/login/getloginuser',
 				type: 'GET',
 				async: false,
 				success: function(data) {
@@ -283,7 +283,7 @@
 
 		function getAllUser() {
 			$.ajax({
-				url: 'http://daoheqiankun.cn/auth/userInfo/getAll',
+				url: 'https://daoheqiankun.cn/auth/userInfo/getAll',
 				type: 'GET',
 				success: function(data) {
 					checkLogin(data);
@@ -301,7 +301,7 @@
 		function saveUser() {
 			$.ajax({
 				type: "GET",
-				url: 'http://daoheqiankun.cn/auth/userInfo/saveUser',
+				url: 'https://daoheqiankun.cn/auth/userInfo/saveUser',
 				data: $('#addUserForm').serialize(),
 				success: function (result) {
 					checkLogin(result);
@@ -325,7 +325,7 @@
 		function deleteUser() {
             $.ajax({
                 type: "GET",
-                url: 'http://daoheqiankun.cn/auth/userInfo/deleteByIdCard',
+                url: 'https://daoheqiankun.cn/auth/userInfo/deleteByIdCard',
                 data: {idCard:$('#deleteUserIdCard').val()},
                 success: function (result) {
 					checkLogin(result);
