@@ -51,16 +51,11 @@
 				<ul class="nav navbar-nav pull-right" style="min-width: 0px;">
 					<!-- BEGIN USER LOGIN DROPDOWN -->
 					<li class="dropdown user" id="header-user">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+						<a id="userInfo" href="#" class="dropdown-toggle">
 							<img alt="" src="img/timg.jpeg" />
-							<span class="username">管理员</span>
-							<i class="fa fa-angle-down"></i>
+							<span class="username">{{ loginUser }}</span>
 						</a>
-						<ul class="dropdown-menu">
-							<li><a href="#"><i class="fa fa-user"></i> 个人资料</a></li>
-							<li><a href="#"><i class="fa fa-cog"></i> 密码修改</a></li>
-							<li><a href="#"><i class="fa fa-power-off"></i> 退出</a></li>
-						</ul>
+
 					</li>
 					<!-- END USER LOGIN DROPDOWN -->
 				</ul>
@@ -294,6 +289,29 @@
 
 	<!-- /JAVASCRIPTS -->
 
+	<script type="text/javascript">
+		var vue_userInfo = new Vue({
+			el: '#userInfo',
+			data: {
+				loginUser: {}
+			}
+		});
+		(function () {
+			$.ajax({
+				url: 'http://daoheqiankun.cn/auth/login/getloginuser',
+				type: 'GET',
+				async: false,
+				success: function(data) {
+					checkLogin(data);
+					var respObj = JSON.parse(data);
+					vue_userInfo.loginUser = respObj['loginUserName'];
+				},
+				error: function() {
+					showHint('系统出错！', 'error');
+				}
+			});
+		})();
+	</script>
 
 	<script type="text/javascript">
 		var vue_houseSelector = new Vue({
@@ -318,11 +336,13 @@
 
 		function getAll() {
 			$.ajax({
-				url: 'http://localhost:9666/visitorsInfo/getAll',
+				url: 'http://daoheqiankun.cn/auth/visitorsInfo/getAll',
 				type: 'GET',
-				dataType: 'JSONP',
-				jsonpCallback: 'jsonpCallback',
+//				dataType: 'JSONP',
+//				jsonpCallback: 'jsonpCallback',
 				success: function(data) {
+					checkLogin(data);
+					data = JSON.parse(data);
 					vue_tbody_visitors_info.visitorInfoList = data;
 					$('#loadingmodal').modal('hide');
 				},
@@ -336,11 +356,11 @@
 		function save() {
 			$.ajax({
 				type: "GET",
-				dataType: "JSONP",
-				url: 'http://localhost:9666/visitorsInfo/save',
+				url: 'http://daoheqiankun.cn/auth/visitorsInfo/save',
 				data: $('#addForm').serialize(),
-				jsonpCallback: 'jsonpCallback',
 				success: function (result) {
+					checkLogin(result);
+					result = JSON.parse(result);
                     $('#addModal').modal('hide');
 					if (result.rtnCode != 'SUCCESS') {
 						showHint('保存失败！' + result.rtnMsg, 'error');
@@ -360,11 +380,11 @@
 		function deleteInfo() {
             $.ajax({
                 type: "GET",
-                dataType: "JSONP",
-                url: 'http://localhost:9666/visitorsInfo/deleteById',
-				jsonpCallback: 'jsonpCallback',
+                url: 'http://daoheqiankun.cn/auth/visitorsInfo/deleteById',
                 data: {authid:$('#deleteId').val()},
                 success: function (result) {
+					checkLogin(result);
+					result = JSON.parse(result);
                     $('#deleteConfirm').modal('hide');
                     if (result.rtnCode != 'SUCCESS') {
 						showHint('保存失败！' + result.rtnMsg, 'error');
@@ -384,9 +404,10 @@
 		function getHouseInfo() {
 			$.ajax({
 				type: "GET",
-				dataType: 'JSONP',
-				url: "http://localhost:9666/houseInfo/getAll",
+				url: "http://daoheqiankun.cn/auth/houseInfo/getAll",
 				success: function(data) {
+					checkLogin(data);
+					data = JSON.parse(data);
 					vue_houseSelector.houseInfoMap = data;
 				},
 				error: function() {

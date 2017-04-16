@@ -49,16 +49,11 @@
 			<ul class="nav navbar-nav pull-right" style="min-width: 0px;">
 				<!-- BEGIN USER LOGIN DROPDOWN -->
 				<li class="dropdown user" id="header-user">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+					<a id="userInfo" href="#" class="dropdown-toggle">
 						<img alt="" src="img/timg.jpeg" />
-						<span class="username">管理员</span>
-						<i class="fa fa-angle-down"></i>
+						<span class="username">{{ loginUser }}</span>
 					</a>
-					<ul class="dropdown-menu">
-						<li><a href="#"><i class="fa fa-user"></i> 个人资料</a></li>
-						<li><a href="#"><i class="fa fa-cog"></i> 密码修改</a></li>
-						<li><a href="#"><i class="fa fa-power-off"></i> 退出</a></li>
-					</ul>
+
 				</li>
 				<!-- END USER LOGIN DROPDOWN -->
 			</ul>
@@ -274,6 +269,30 @@
 
 	<!-- /JAVASCRIPTS -->
 	<script type="text/javascript">
+		var vue_userInfo = new Vue({
+			el: '#userInfo',
+			data: {
+				loginUser: {}
+			}
+		});
+		(function () {
+			$.ajax({
+				url: 'http://daoheqiankun.cn/auth/login/getloginuser',
+				type: 'GET',
+				async: false,
+				success: function(data) {
+					checkLogin(data);
+					var respObj = JSON.parse(data);
+					vue_userInfo.loginUser = respObj['loginUserName'];
+				},
+				error: function() {
+					showHint('系统出错！', 'error');
+				}
+			});
+		})();
+	</script>
+
+	<script type="text/javascript">
 		var vue_tbody_user_info = new Vue({
 			el: '#tbody_user_info',
 			data: {
@@ -288,11 +307,11 @@
 
 		function getAllUser() {
 			$.ajax({
-				url: 'http://localhost:9666/userInfo/getAll',
+				url: 'http://daoheqiankun.cn/auth/userInfo/getAll',
 				type: 'GET',
-				dataType: 'JSONP',
-				jsonpCallback: 'jsonpCallback',
 				success: function(data) {
+					checkLogin(data);
+					data = JSON.parse(data);
 					vue_tbody_user_info.userInfoList = data;
 					$('#loadingmodal').modal('hide');
 				},
@@ -306,10 +325,11 @@
 		function saveUser() {
 			$.ajax({
 				type: "GET",
-				dataType: "JSONP",
-				url: 'http://localhost:9666/userInfo/saveUser',
+				url: 'http://daoheqiankun.cn/auth/userInfo/saveUser',
 				data: $('#addUserForm').serialize(),
 				success: function (result) {
+					checkLogin(result);
+					result = JSON.parse(result);
                     $('#addUser').modal('hide');
 					if (result.rtnCode != 'SUCCESS') {
 						showHint('保存失败！' + result.rtnMsg, 'error');
@@ -329,10 +349,11 @@
 		function deleteUser() {
             $.ajax({
                 type: "GET",
-                dataType: "JSONP",
-                url: 'http://localhost:9666/userInfo/deleteByIdCard',
+                url: 'http://daoheqiankun.cn/auth/userInfo/deleteByIdCard',
                 data: {idCard:$('#deleteUserIdCard').val()},
                 success: function (result) {
+					checkLogin(result);
+					result = JSON.parse(result);
                     $('#deleteUserConfirm').modal('hide');
                     if (result.rtnCode != 'SUCCESS') {
                         showHint('保存失败！' + result.rtnMsg , 'error');

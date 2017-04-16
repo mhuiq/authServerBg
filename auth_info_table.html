@@ -40,8 +40,9 @@
 					<!-- /COMPANY LOGO -->
 					<!-- TEAM STATUS FOR MOBILE -->
 					<div class="visible-xs">
-						<a href="#" class="team-status-toggle switcher btn dropdown-toggle">
-							<i class="fa fa-users"></i>
+						<a id="userInfo" href="#" class="dropdown-toggle">
+							<img alt="" src="img/timg.jpeg" />
+							<span class="username">{{ loginUser }}</span>
 						</a>
 					</div>
 					<!-- /TEAM STATUS FOR MOBILE -->
@@ -272,6 +273,30 @@
 
 
 	<script type="text/javascript">
+		var vue_userInfo = new Vue({
+			el: '#userInfo',
+			data: {
+				loginUser: {}
+			}
+		});
+		(function () {
+			$.ajax({
+				url: 'http://daoheqiankun.cn/auth/login/getloginuser',
+				type: 'GET',
+				async: false,
+				success: function(data) {
+					checkLogin(data);
+					var respObj = JSON.parse(data);
+					vue_userInfo.loginUser = respObj['loginUserName'];
+				},
+				error: function() {
+					showHint('系统出错！', 'error');
+				}
+			});
+		})();
+	</script>
+
+	<script type="text/javascript">
 		var vue_houseSelector = new Vue({
 			el: '#houseSelectorId',
 			data: {
@@ -300,11 +325,11 @@
 
 		function getAll() {
 			$.ajax({
-				url: 'http://localhost:9666/authInfo/getAll',
+				url: 'http://daoheqiankun.cn/auth/authInfo/getAll',
 				type: 'GET',
-				dataType: 'JSONP',
-				jsonpCallback: 'jsonpCallback',
 				success: function(data) {
+					checkLogin(data);
+					data = JSON.parse(data);
 					vue_tbody_auth_info.authInfoList = data;
 					$('#loadingmodal').modal('hide');
 				},
@@ -318,11 +343,11 @@
 		function save() {
 			$.ajax({
 				type: "GET",
-				dataType: "JSONP",
-				url: 'http://localhost:9666/authInfo/save',
+				url: 'http://daoheqiankun.cn/auth/authInfo/save',
 				data: $('#addForm').serialize(),
-				jsonpCallback: 'jsonpCallback',
 				success: function (result) {
+					checkLogin(result);
+					result = JSON.parse(result);
                     $('#addModal').modal('hide');
 					if (result.rtnCode != 'SUCCESS') {
 						showHint('保存失败！' + result.rtnMsg, 'error');
@@ -342,11 +367,11 @@
 		function deleteInfo() {
             $.ajax({
                 type: "GET",
-                dataType: "JSONP",
-                url: 'http://localhost:9666/authInfo/deleteById',
-				jsonpCallback: 'jsonpCallback',
+                url: 'http://daoheqiankun.cn/auth/authInfo/deleteById',
                 data: {authid:$('#deleteId').val()},
                 success: function (result) {
+					checkLogin(result);
+					result = JSON.parse(result);
                     $('#deleteConfirm').modal('hide');
                     if (result.rtnCode != 'SUCCESS') {
 						showHint('保存失败！' + result.rtnMsg, 'error');
@@ -366,9 +391,10 @@
 		function getHouseInfo() {
 			$.ajax({
 				type: "GET",
-				dataType: 'JSONP',
-				url: "http://localhost:9666/houseInfo/getAll",
+				url: "http://daoheqiankun.cn/auth/houseInfo/getAll",
 				success: function(data) {
+					checkLogin(data);
+					data = JSON.parse(data);
 					vue_houseSelector.houseInfoMap = data;
 					getUserInfo();
 				},
@@ -381,10 +407,10 @@
 		function getUserInfo() {
 			$.ajax({
 				type: "GET",
-				dataType: 'JSONP',
-				url: "http://localhost:9666/userInfo/getAll",
+				url: "http://daoheqiankun.cn/auth/userInfo/getAll",
 				success: function(data) {
-
+					checkLogin(data);
+					data = JSON.parse(data);
 					vue_userSelector.userInfoList = data;
 				},
 				error: function() {

@@ -9,3 +9,10 @@ function showHint(msg, type) {
         showCloseButton: true
     });
 }
+
+function checkLogin(data) {
+    var respObj = JSON.parse(data);
+    if (respObj['isLogin'] != undefined && !respObj['isLogin']) {
+        window.location.href = respObj['loginUrl'];
+    }
+}

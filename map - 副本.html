@@ -57,10 +57,11 @@ p{
     function init() {
         var i = 0;
         // 22.610208,113.822479  22.608940,114.421234  22.709056,114.104004  22.518900,114.065552
-        var center=new qq.maps.LatLng(22.679282,114.053192);
+        var center=new qq.maps.LatLng(23.140360,113.291016);
         var map=new qq.maps.Map(document.getElementById("container"),{
             center:center,
-            zoom:11
+            zoom:8,
+            mapTypeControl:false // 禁用地图类型控件
         });
         //添加定时器
         // setTimeout(function(){
@@ -73,7 +74,7 @@ p{
             var h = 113.822479 + Math.random();
 
             Messenger.options = {
-                extraClasses: 'messenger-fixed messenger-on-left',
+                extraClasses: 'messenger-fixed messenger-on-top messenger-on-right',
                 theme: 'air'
             }
             Messenger().post({
